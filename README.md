@@ -2,6 +2,10 @@
 
 An end-to-end Automated Number Plate Recognition (ANPR) prototype designed for restricted zone access control. This system acts as a "digital bouncer," utilizing local multimodal AI to extract complex Thai license plate text via Optical Character Recognition (OCR), process the data through a Node.js backend, and log entry/exit states in a PostgreSQL database.
 
+<div align="center">
+  <video src="demo.mp4" width="100%" controls autoplay loop muted></video>
+</div>
+
 ## 📸 Screenshots
 
 | Process Car Plate | Vehicle Logs |
