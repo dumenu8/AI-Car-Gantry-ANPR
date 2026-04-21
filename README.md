@@ -5,7 +5,7 @@ An end-to-end Automated Number Plate Recognition (ANPR) prototype designed for r
 ## 📸 Screenshots
 
 | Process Car Plate | Vehicle Logs |
-|:---:|:---:|:---:|
+|:---:|:---:|
 | ![Process Car Plate](./process-carplate-screenshot.png) | ![Vehicle Logs](./vehicle-logs-screenshot.png) 
 
 
