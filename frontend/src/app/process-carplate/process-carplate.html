@@ -1,0 +1,85 @@
+<div class="space-y-6">
+    <div class="mb-8">
+        <h2 class="text-3xl font-extrabold text-white">Car Plate Processing Simulator</h2>
+        <p class="mt-2 text-sm text-gray-400">Upload a camera scan of a license plate to test the OCR engine and gantry logic.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Controls & Upload -->
+        <div class="bg-gray-800 rounded-2xl shadow-xl border border-gray-700 p-6 space-y-6 transition-all hover:border-gray-600">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Gate Direction</label>
+                <div class="flex space-x-4">
+                    <label class="inline-flex items-center">
+                        <input type="radio" class="form-radio text-teal-500 bg-gray-900 border-gray-700 focus:ring-teal-500" name="flowType" value="incoming" [ngModel]="flowType()" (ngModelChange)="flowType.set($event)">
+                        <span class="ml-2 text-gray-300">Incoming</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" class="form-radio text-teal-500 bg-gray-900 border-gray-700 focus:ring-teal-500" name="flowType" value="outgoing" [ngModel]="flowType()" (ngModelChange)="flowType.set($event)">
+                        <span class="ml-2 text-gray-300">Outgoing</span>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Upload Image Scan (10MB Max, JPEG/PNG)</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-xl hover:border-teal-500 transition-colors bg-gray-900">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex flex-col items-center text-sm text-gray-400">
+                            <label for="file-upload" class="relative cursor-pointer bg-gray-800 rounded-md font-medium text-teal-400 hover:text-teal-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-teal-500 focus-within:ring-offset-gray-900 p-1">
+                                <span>Upload a file</span>
+                                <input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/jpeg, image/png" (change)="onFileSelected($event)">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-2 text-sm text-red-400" *ngIf="errorMsg()">{{ errorMsg() }}</p>
+            </div>
+
+            <div class="pt-2">
+                <button (click)="processImage()" [disabled]="!imagePreview() || isProcessing()" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-95">
+                    <span *ngIf="isProcessing()">Processing with Qwen...</span>
+                    <span *ngIf="!isProcessing()">Process Image Engine</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Output Display -->
+        <div class="space-y-6 flex flex-col">
+            <!-- Display Area 1: Image -->
+            <div class="bg-gray-800 rounded-2xl shadow-xl border border-gray-700 p-4 h-64 flex items-center justify-center overflow-hidden">
+                <span *ngIf="!imagePreview()" class="text-gray-500 italic">No image uploaded</span>
+                <img *ngIf="imagePreview()" [src]="imagePreview()" class="object-contain h-full w-full rounded-lg" alt="Preview"/>
+            </div>
+
+            <!-- Display Area 3: Status -->
+            <div *ngIf="statusResult()" class="rounded-2xl shadow-xl p-6 border transition-all animate-pulse"
+                 [ngClass]="{
+                     'bg-green-900/40 border-green-500 text-green-300': statusResult()?.status === 'ENTERED' || statusResult()?.status === 'EXITED',
+                     'bg-red-900/40 border-red-500 text-red-300': statusResult()?.status === 'DENIED_UNREGISTERED' || statusResult()?.status === 'ERROR_NO_ENTRY_FOUND'
+                 }">
+                <h3 class="text-lg font-bold flex items-center mb-1">
+                    <span class="mr-2 text-2xl">
+                        {{ (statusResult()?.status === 'ENTERED' || statusResult()?.status === 'EXITED') ? '✅' : '🛑' }}
+                    </span>
+                    Execution Result
+                </h3>
+                <p class="font-medium text-lg">{{ statusResult()?.message }}</p>
+            </div>
+
+            <!-- Display Area 2: JSON -->
+            <div class="bg-gray-950 rounded-2xl shadow-inner border border-gray-700 overflow-hidden flex-1 flex flex-col">
+                <div class="bg-gray-800 border-b border-gray-700 px-4 py-2">
+                    <span class="text-xs font-mono text-gray-400">RAW LLM JSON OUTPUT</span>
+                </div>
+                <div class="p-4 overflow-auto flex-1 h-48">
+                    <pre class="text-sm font-mono text-green-400 whitespace-pre-wrap">{{ rawResponse() || 'Awaiting output...' }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

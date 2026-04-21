@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Vehicle {
+  id           String      @id @default(uuid()) @db.Uuid
+  plateNumber  String      @unique
+  province     String?
+  isRegistered Boolean     @default(false)
+  isBanned     Boolean     @default(false)
+  logs         GantryLog[]
+}
+
+model GantryLog {
+  id              String    @id @default(uuid()) @db.Uuid
+  vehicleUUID     String    @db.Uuid
+  plateNumber     String
+  entryTime       DateTime  @default(now())
+  exitTime        DateTime?
+  durationMinutes Int?
+  status          String
+  vehicle         Vehicle   @relation(fields: [vehicleUUID], references: [id])
+}
